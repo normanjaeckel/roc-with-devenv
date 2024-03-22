@@ -22,13 +22,12 @@ jobs:
       - name: Install devenv.sh
         run: nix-env -if https://install.devenv.sh/latest
 
-      - name: Install roc
-        shell: devenv shell bash -- -e {0}
-        run:
-          - wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
-          - tar -xf roc.tar.gz
-          - rm roc.tar.gz
+      - name: Get roc nightly
+        run: wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
 
-      - name: Run tests
+      - name: Unzip roc
+        run: tar -xf roc.tar.gz && rm roc.tar.gz
+
+      - name: Run tests using devenv shell to get the roc binary into PATH
         shell: devenv shell bash -- -e {0}
         run: roc test
