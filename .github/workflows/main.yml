@@ -30,7 +30,7 @@ jobs:
 
       - name: Show some details
         shell: devenv shell bash -- -e {0}
-        run: roc version && ldd $(type -p roc) && ls /lib/x86_64-linux-gnu/libc.so.6
+        run: roc version && ldd $(type -p roc) && ls /lib/x86_64-linux-gnu/libc.so.6 && readelf -sW /nix/store/ksk3rnb0ljx8gngzk19jlmbjyvac4hw6-glibc-2.38-44/lib/libc.so.6
 
       - name: Run tests using devenv shell to get the roc binary into PATH
         shell: devenv shell bash -- -e {0}
