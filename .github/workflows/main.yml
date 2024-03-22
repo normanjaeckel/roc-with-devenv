@@ -13,11 +13,16 @@ jobs:
 
       - name: Install and set up Nix
         uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
 
       - name: Configure Nix to use the devenv cache provided by Cachix to speed up the installation
         uses: cachix/cachix-action@v14
         with:
           name: devenv
+
+      #- name: Install libgcc
+      #  run: nix-env -iA libgcc -f '<nixpkgs>'
 
       - name: Install devenv.sh
         run: nix-env -if https://install.devenv.sh/latest
@@ -30,29 +35,29 @@ jobs:
 
       - name: Show some details
         shell: devenv shell bash -- -e {0}
-        run: roc version && ldd $(type -p roc) && ls /lib/x86_64-linux-gnu/libc.so.6 && readelf -sW /nix/store/ksk3rnb0ljx8gngzk19jlmbjyvac4hw6-glibc-2.38-44/lib/libc.so.6
+        run: roc version && ldd $(type -p roc) && ls /lib/x86_64-linux-gnu/libc.so.6
 
       - name: Run tests using devenv shell to get the roc binary into PATH
         shell: devenv shell bash -- -e {0}
         run: RUST_BACKTRACE=full roc test
 
-  withoutDevenv:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # withoutDevenv:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Get roc nightly
-        run: wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
+  #     - name: Get roc nightly
+  #       run: wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
 
-      - name: Unzip roc
-        run: tar -xf roc.tar.gz && rm roc.tar.gz
+  #     - name: Unzip roc
+  #       run: tar -xf roc.tar.gz && rm roc.tar.gz
 
-      - name: Rename roc nightly dir
-        run: mv $(pwd)/$(find . -type d -iname 'roc_nightly*' | head -n 1) $(pwd)/roc-dir
+  #     - name: Rename roc nightly dir
+  #       run: mv $(pwd)/$(find . -type d -iname 'roc_nightly*' | head -n 1) $(pwd)/roc-dir
 
-      - name: Show some details
-        run: PATH=roc-dir:$PATH roc version && ldd roc-dir/roc && ls /lib/x86_64-linux-gnu/libc.so.6
+  #     - name: Show some details
+  #       run: PATH=roc-dir:$PATH roc version && ldd roc-dir/roc && ls /lib/x86_64-linux-gnu/libc.so.6
 
-      - name: Run tests
-        run: PATH=roc-dir:$PATH roc test
+  #     - name: Run tests
+  #       run: PATH=roc-dir:$PATH roc test
