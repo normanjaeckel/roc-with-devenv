@@ -5,7 +5,7 @@ on:
   - pull_request
 
 jobs:
-  build:
+  withDevenv:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,6 +28,31 @@ jobs:
       - name: Unzip roc
         run: tar -xf roc.tar.gz && rm roc.tar.gz
 
+      - name: Show some details
+        shell: devenv shell bash -- -e {0}
+        run: roc version && ldd $(type -p roc) && ls /lib/x86_64-linux-gnu/libc.so.6
+
       - name: Run tests using devenv shell to get the roc binary into PATH
         shell: devenv shell bash -- -e {0}
-        run: roc test
+        run: RUST_BACKTRACE=full roc test
+
+  withoutDevenv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get roc nightly
+        run: wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
+
+      - name: Unzip roc
+        run: tar -xf roc.tar.gz && rm roc.tar.gz
+
+      - name: Rename roc nightly dir
+        run: mv $(pwd)/$(find . -type d -iname 'roc_nightly*' | head -n 1) $(pwd)/roc-dir
+
+      - name: Show some details
+        run: PATH=roc-dir:$PATH roc version && ldd roc-dir/roc && ls /lib/x86_64-linux-gnu/libc.so.6
+
+      - name: Run tests
+        run: PATH=roc-dir:$PATH roc test
