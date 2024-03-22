@@ -1,0 +1,34 @@
+name: My workflow
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install and set up Nix
+        uses: cachix/install-nix-action@v25
+
+      - name: Configure Nix to use the devenv cache provided by Cachix to speed up the installation
+        uses: cachix/cachix-action@v14
+        with:
+          name: devenv
+
+      - name: Install devenv.sh
+        run: nix-env -if https://install.devenv.sh/latest
+
+      - name: Install roc
+        shell: devenv shell bash -- -e {0}
+        run:
+          - wget https://github.com/roc-lang/roc/releases/download/nightly/roc_nightly-linux_x86_64-latest.tar.gz --no-verbose --output-document roc.tar.gz
+          - tar -xf roc.tar.gz
+          - rm roc.tar.gz
+
+      - name: Run tests
+        shell: devenv shell bash -- -e {0}
+        run: roc test
