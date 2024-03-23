@@ -2,7 +2,6 @@
 
 {
   packages = [
-    pkgs.llvmPackages_9.libcxxClang
   ];
 
   enterShell = ''
